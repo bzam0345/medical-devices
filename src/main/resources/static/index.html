@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Devices</title>
+    <style>
+    body {
+        background-color: #f0f5ff; /* Háttérszín, kék árnyalat */
+        font-family: 'Arial', sans-serif; /* Betűtípus beállítása */
+    }
+
+    h1 {
+        color: #1890ff; /* Címsor szín, kék árnyalat */
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th, td {
+        border: 1px solid #e6f7ff; /* Tábla cella keret színe, világosabb kék árnyalat */
+        text-align: left;
+        padding: 8px;
+    }
+
+    th, div {
+        background-color: #bae7ff; /* Fejléc háttérszíne, világos kék árnyalat */
+    }
+
+    div{
+        margin: 20px;
+        padding: 20px;
+    }
+
+    form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    }
+
+    label {
+        color: #1890ff; /* Címkék színe, kék árnyalat */
+        margin-right: 10px;
+        display: block;
+    }
+
+    input {
+        padding: 8px;
+        margin-right: 10px;
+        border: 1px solid #e6f7ff; /* Input keret színe, világosabb kék árnyalat */
+    }
+
+    button {
+        background-color: #1890ff; /* Gomb háttérszíne, kék árnyalat */
+        color: #fff;
+        padding: 8px 16px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .delete-button {
+        background-color: #ff9000;
+    }
+</style>
+</head>
+<body>
+
+<h1>Medical Devices</h1>
+
+<table id="deviceTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Characteristics</th>
+        <th>Price(€)</th>
+        <th>Stock</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- A beszurt adatok ide-->
+    </tbody>
+</table>
+
+<div>
+    <h3>Add new device(s)</h3>
+    <form id="deviceForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="characteristics">Characteristics:</label>
+        <input type="text" id="characteristics" name="characteristics" required>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" step="0.01" required>
+
+        <label for="stock">Stock:</label>
+        <input type="number" id="stock" name="stock" required>
+
+        <button type="button" onclick="addDevice()">Add Device</button>
+    </form>
+</div>
+
+<script>
+    // Function to fetch and display devices from the API
+    function fetchDevices() {
+        fetch('/api/medical-devices')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('deviceTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = '';
+
+                data.forEach(device => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${device.id}</td>
+                        <td>${device.name}</td>
+                        <td>${device.characteristics}</td>
+                        <td>${device.price}</td>
+                        <td>${device.stock}</td>
+                        <td>
+                            <button onclick="incrementDevice(${device.id})">Increment Stock (+)</button>
+                            <button onclick="purchaseDevice(${device.id})">Purchase (-) </button>
+                            <button class="delete-button" onclick="deleteDevice(${device.id})">Delete</button>
+                        </td>
+                    `;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to add a new device
+    function addDevice() {
+        const formData = new FormData(document.getElementById('deviceForm'));
+        const device = {};
+        formData.forEach((value, key) => {
+            device[key] = value;
+        });
+
+        fetch('/api/medical-devices', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(device),
+        })
+        .then(() => {
+            fetchDevices();
+            document.getElementById('deviceForm').reset();
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to purchase a device
+    function purchaseDevice(deviceId) {
+        fetch(`/api/medical-devices/${deviceId}/purchase`, {
+            method: 'POST',
+        })
+        .then(() => fetchDevices())
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to increment a device count
+    function incrementDevice(deviceId) {
+        fetch(`/api/medical-devices/${deviceId}/increment`, {
+            method: 'POST',
+        })
+        .then(() => fetchDevices())
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to delete a device
+    function deleteDevice(deviceId) {
+        fetch(`/api/medical-devices/${deviceId}`, {
+            method: 'DELETE',
+        })
+        .then(() => fetchDevices())
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Fetch devices when the page loads
+    fetchDevices();
+</script>
+
+</body>
+</html>

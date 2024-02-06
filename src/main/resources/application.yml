@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://medical-devices.database.windows.net:1433;database=medical-devices;user=medical-devices-admin@medical-devices;password=Kutatas2023;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+    username: medical-devices-admin
+    password: Kutatas2023
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.SQLServer2012Dialect
+    properties:
+      jakarta.persistence.jdbc.url: jdbc:sqlserver://medical-devices.database.windows.net:1433;database=medical-devices;user=medical-devices-admin@medical-devices;password=Kutatas2023;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+
+server:
+  port: 8081
